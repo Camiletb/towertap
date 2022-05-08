@@ -1,32 +1,46 @@
 // ------------------------------------------------
 // BASIC SETUP
 // ------------------------------------------------
+//Globales
+let camera, scene, renderer;
 
-// Crear una escena vacía
-var scene = new THREE.Scene();
+init();
+function init(){
+  scene = new THREE.Scene(); // Crear una escena vacía
+  
+  // Cámara
+  const aspect = window.innerWidth / window.innerHeight;
+  const width = 20;
+  const height = width / aspect;
+  camera = new THREE.OrthographicCamera(
+      // izq, der, arriba, abajo, plano cercano, plano lejano
+      width / -2, 
+      width / 2, 
+      height / 2, 
+      height / -2, 
+      1, 
+      1000 );
+  camera.position.set(10, 5, 10);
+  camera.lookAt(scene.position);
 
-// Cámara
-const aspect = window.innerWidth / window.innerHeight;
-const width = 20;
-const height = width / aspect;
-const camera = new THREE.OrthographicCamera(
-    // izq, der, arriba, abajo, plano cercano, plano lejano
-    width / -2, 
-    width / 2, 
-    height / 2, 
-    height / -2, 
-    1, 
-    1000 );
-camera.position.set(10, 5, 10);
-camera.lookAt(scene.position);
+  //Iluminación
+  const a_light = new THREE.AmbientLight(0xffffff, 0.6); // Luz ambiente
+  scene.add(a_light);
+  const d_light = new THREE.DirectionalLight(0xffffff, 0.6); // Luz direccional
+  d_light.position.set(10, 20, 0);
+  scene.add(d_light);
 
-// Configurar el render
-var renderer = new THREE.WebGLRenderer({antialias:true}); // Crear con Antialiasing
-renderer.setClearColor("#000000"); // Configurar el clear color del render
-renderer.setSize( window.innerWidth, window.innerHeight ); // Configurar tamaño del render
+  // Configurar el render
+  renderer = new THREE.WebGLRenderer({antialias:true}); // Crear con Antialiasing
+  renderer.setClearColor("#000000"); // Configurar el clear color del render
+  renderer.setSize( window.innerWidth, window.innerHeight ); // Configurar tamaño del render
+  
+  // Añadir render al HTML
+  document.body.appendChild( renderer.domElement );
+}
 
-// Añadir render al HTML
-document.body.appendChild( renderer.domElement );
+
+
 
 // ------------------------------------------------
 // FUN STARTS HERE
@@ -41,12 +55,6 @@ var cube = new THREE.Mesh( geometry, material );
 //cube.rotateY(Math.PI/4);
 scene.add( cube ); // Añadir el cubo a la escena
 
-//Iluminación
-const a_light = new THREE.AmbientLight(0xffffff, 0.6); // Luz ambiente
-scene.add(a_light);
-const d_light = new THREE.DirectionalLight(0xffffff, 0.6); // Luz direccional
-d_light.position.set(10, 20, 0);
-scene.add(d_light);
 
 // Render Loop
 var render = function () {
@@ -57,5 +65,4 @@ var render = function () {
   // Render la escena
   renderer.render(scene, camera);
 };
-
 render();
