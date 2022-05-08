@@ -6,6 +6,7 @@ let camera, scene, renderer;
 let pila = [];
 const hBox = 0.8;
 const initBoxSize = 3;
+const hCamera = (10, 5, 10); // posición inicial de la cámara
 
 //Contadores y auxiliares
 let levelCont = 1;
@@ -54,15 +55,15 @@ function init(){
 // FUN STARTS HERE
 // ------------------------------------------------
 
-function addNivel(x, z, width, depth, n){
+function addNivel(x, z, width, depth){
   const y = pila.length * hBox; // Posición de la nueva capa
   const nivel = createCube(x, y, z, width, depth);
+  levelCont++;
 
   if(levelCont % 2 == 0)
     nivel.direction = "z";
   else
     nivel.direction = "x";
-  levelCont++;
 
   pila.push(nivel);
 }
@@ -117,15 +118,28 @@ window.addEventListener("click", () =>{
     started = true;
   }else{
     if(pila.length > 0){
-      const nivel = pila.pop();
-      scene.remove(nivel.threejs);
+      // Comportamiento de los cubos
+      //const nivel = pila.pop();
+      //scene.remove(nivel.threejs);
+      const head = pila[pila.length - 1];
+      const dir = head.direction;
+
+      //Next level
+      const siguienteX = dir == "x" ? 0 : -10; // Si es x, 0, si es z, -10
+      const siguienteZ = dir == "z" ? 0 : -10; // Si es x, 0, si es z, -10
+      //const siguienteDir = dir == "x" ? "z" : "x";
+      const nWidth = initBoxSize;
+      const nDepth = initBoxSize;
+
+      addNivel(siguienteX, siguienteZ, nWidth, nDepth);
+      /*
       if(nivel.direction == "z"){
         addNivel(0, 0, nivel.width, nivel.depth);
       }else{
         addNivel(0, 0, nivel.depth, nivel.width);
-      }
+      }*/
+    }
   }
-}
 });
 
 //Resetear el juego
@@ -148,4 +162,21 @@ function animation(){
   el eje head.direction (x o z, en función de si es un nivel
   par o impar) */
   head.position[head.direction] += speed;
+
+  updateCamera();
+}
+
+function updateCamera(){
+  /*Vamos a cambiar la posición de la cámara en función del
+  nivel más alto de la pila:
+
+  Si la posición de la cámara es menor que la suma de la posición
+  inicial (hCamera.y) y el incremento de h que le corresponde
+  al nivel más alto de la pila, es decir, si la cámara no se ha acabado de 
+  desplazar, seguimos moviendo la cámara.
+  */
+  if(camera.position.y < hBox * pila.length + hCamera.y)
+    camera.position.y += speed;
+
+  renderer.render(scene, camera);
 }
