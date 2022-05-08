@@ -11,9 +11,12 @@ const hCamera = 5; // posición inicial de la cámara
 //Contadores y auxiliares
 let levelCont = 1;
 let encima = false;
+let lose = false;
+let end = false;
 
 init();
 function init(){
+  end = false;
   scene = new THREE.Scene(); // Crear una escena vacía
   
   //
@@ -43,6 +46,7 @@ function init(){
   d_light.position.set(10, 20, 0);
   scene.add(d_light);
 
+  
   // Configurar el render
   renderer = new THREE.WebGLRenderer({antialias:true}); // Crear con Antialiasing
   renderer.setClearColor("#000000"); // Configurar el clear color del render
@@ -68,7 +72,7 @@ function addNivel(x, z, width, depth, direction){
   // else
   //   nivel.direction = "x";
 
-  pila.push(nivel);
+  pila.push(nivel); // Añadir el nivel a la pila
 }
 
 
@@ -107,18 +111,21 @@ var render = function () {
   // if(!started)
   //   animation();
 
-  if(!encima){
-
+  if(!end){
+    //and NotLose
     const head = pila[pila.length - 1];
-    pila.forEach(function(cube){
-      if(cube.direction == "z"){
+    //pila.forEach(function(cube){
+      if(head.direction == "z"){
         head.threejs.position.z += 0.05;
-      }else{
+      }
+      if(head.direction == "x"){
         head.threejs.position.x += 0.05;
       }
-      
-    });
+      //updateCamera();
+    //});
   }
+
+  //if
   // Render la escena
   renderer.render(scene, camera);
 };
@@ -127,17 +134,17 @@ render();
 // ------------------------------------------------
 // FUN ENDS HERE (LISTENERS STARTS HERE)
 // ------------------------------------------------
-let started = true;
+let jugando = true;
 //window.addEventListener("mousedown", manejador);
 //window.addEventListener("touchstart", manejador);
 window.addEventListener("click", manejador);
 
 function manejador(){
-  if(!started){
+  if(!jugando){
     //renderer.setAnimationLoop(animation);
     //Usamos setAnimationLoop porque setAnimationFrame sólo se
     //ejecuta una vez, y necesitamos que la animación se ejecute en bucle
-    started = true;
+    jugando = true;
   }else{
     if(pila.length > 0){
       console.log("Click! Bloque número: ", pila.length, ".");
@@ -145,13 +152,20 @@ function manejador(){
       // Comprobamos si el último bloque está encima del bloque anterior
       const head = pila[pila.length - 1];
       const prev = pila[pila.length - 2];
-      if(head.threejs.position[head.direction] > prev.threejs.position[head.direction]){ // Si está encima
-        console.log("Encima!");
-        encima = true;
-      }else{
-        console.log("No encima!");
-        //Game Over
-        //gestión de derrota
+      if(head.direction == "x"){
+        if(head.threejs.position.x > prev.threejs.position.x - prev.width &&
+           head.threejs.position.x < prev.threejs.position.x + prev.width){ // Si está encima
+          console.log("Encima!");
+          encima = true;
+        }else{
+          console.log("No encima!");
+          //Game Over
+          //gestión de derrota
+          fin();
+
+          lose = true;
+          jugando = false;
+        }
       }
 
 
@@ -181,18 +195,21 @@ function manejador(){
       //const nivel = pila.pop();
       //scene.remove(nivel.threejs);
       // const head = pila[pila.length - 1];
+      if(!lose){
       const dir = head.direction;
 
       //Next level
       //posición inicial
       const siguienteX = dir == "x" ? 0 : -10; // Si es x, 0, si es z, -10
       const siguienteZ = dir == "z" ? 0 : -10; // Si es x, 0, si es z, -10
-      //const siguienteDir = dir == "x" ? "z" : "x";
+      const siguienteDir = dir == "x" ? "z" : "x";
       const nWidth = initBoxSize; // Se cambiará por los futuros tamaños
       const nDepth = initBoxSize;
 
       
-      addNivel(siguienteX, siguienteZ, nWidth, nDepth);
+      encima = false;
+      addNivel(siguienteX, siguienteZ, nWidth, nDepth, siguienteDir);
+      }
       // if(nivel.direction == "z"){
       //   addNivel(0, 0, nivel.width, nivel.depth);
       // }else{
@@ -207,15 +224,28 @@ function manejador(){
 //Resetear el juego
 window.addEventListener("keydown", (e) => {
   if(e.key == "r"){
-    location.reload();
-    scene.remove(pila[0].threejs);
-    pila = [];
-    levelCont = 1;
-
-    addNivel(0, 0, initBoxSize, initBoxSize);
-    addNivel(-10, 0, initBoxSize, initBoxSize, 1);
+    reset();
 }
 });
+
+function fin(){
+  console.log("Game Over!");
+  //gestión de derrota
+  //reset();
+  end = true;
+  //gestión de victoria
+
+}
+
+function reset(){
+  location.reload();
+  scene.remove(pila[0].threejs);
+  pila = [];
+  levelCont = 1;
+
+  addNivel(0, 0, initBoxSize, initBoxSize);
+  addNivel(-10, 0, initBoxSize, initBoxSize, "x");
+}
 
 function animation(){
   const speed = 0.15;
@@ -225,7 +255,7 @@ function animation(){
   par o impar) */
   head.position[head.direction] += speed;
   renderer.render(scene, camera);
-  updateCamera();
+  //updateCamera();
 }
 
 function updateCamera(){
@@ -237,10 +267,11 @@ function updateCamera(){
   al nivel más alto de la pila, es decir, si la cámara no se ha acabado de 
   desplazar, seguimos moviendo la cámara.
   */
+ 
   if(camera.position.y < hBox * pila.length + hCamera)
     //camera.position.set(10, hCamera + levelCont * hBox, 10);
     //camera.position.set(camera.position.x, hBox * pila.length + hCamera, camera.position.z);
-    //camera.position.y += 0.1;
+    camera.position.y += 0.01;
 
   renderer.render(scene, camera);
 }
