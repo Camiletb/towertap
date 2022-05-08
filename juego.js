@@ -52,7 +52,7 @@ scene.add(d_light);
 var render = function () {
   requestAnimationFrame( render );
 
-  //cube.rotation.y += 0.01;
+  //cube.rotation.y += 0.01;    
 
   // Render la escena
   renderer.render(scene, camera);
