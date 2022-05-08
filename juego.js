@@ -126,8 +126,21 @@ window.addEventListener("click", () =>{
       }
   }
 }
-
 });
+
+//Resetear el juego
+window.addEventListener("keydown", (e) => {
+  if(e.key == "r"){
+    location.reload();
+    scene.remove(pila[0].threejs);
+    pila = [];
+    levelCont = 1;
+
+    addNivel(0, 0, initBoxSize, initBoxSize);
+    addNivel(-10, 0, initBoxSize, initBoxSize, 1);
+}
+});
+
 function animation(){
   const speed = 0.015;
   const head = pila[pila.length - 1]; //elemento más alto de la pila
