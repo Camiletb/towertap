@@ -10,6 +10,7 @@ const hCamera = 5; // posición inicial de la cámara
 
 //Contadores y auxiliares
 let levelCont = 1;
+let encima = false;
 
 init();
 function init(){
@@ -106,15 +107,18 @@ var render = function () {
   // if(!started)
   //   animation();
 
-  const head = pila[pila.length - 1];
-      pila.forEach(function(cube){
-        if(cube.direction == "z"){
-          head.threejs.position.z += 0.15;
-        }else{
-          head.threejs.position.x += 0.15;
-        }
+  if(!encima){
 
-      });
+    const head = pila[pila.length - 1];
+    pila.forEach(function(cube){
+      if(cube.direction == "z"){
+        head.threejs.position.z += 0.05;
+      }else{
+        head.threejs.position.x += 0.05;
+      }
+      
+    });
+  }
   // Render la escena
   renderer.render(scene, camera);
 };
@@ -130,12 +134,30 @@ window.addEventListener("click", manejador);
 
 function manejador(){
   if(!started){
-    renderer.setAnimationLoop(animation);
+    //renderer.setAnimationLoop(animation);
     //Usamos setAnimationLoop porque setAnimationFrame sólo se
     //ejecuta una vez, y necesitamos que la animación se ejecute en bucle
     started = true;
   }else{
     if(pila.length > 0){
+      console.log("Click! Bloque número: ", pila.length, ".");
+
+      // Comprobamos si el último bloque está encima del bloque anterior
+      const head = pila[pila.length - 1];
+      const prev = pila[pila.length - 2];
+      if(head.threejs.position[head.direction] > prev.threejs.position[head.direction]){ // Si está encima
+        console.log("Encima!");
+        encima = true;
+      }else{
+        console.log("No encima!");
+        //Game Over
+        //gestión de derrota
+      }
+
+
+
+
+
       // Comportamiento de los cubos
       // if(head.direction == "z"){
       //   head.threejs.position.z += 1;
@@ -159,18 +181,18 @@ function manejador(){
       //const nivel = pila.pop();
       //scene.remove(nivel.threejs);
       // const head = pila[pila.length - 1];
-      // const dir = head.direction;
+      const dir = head.direction;
 
-      // //Next level
-      // //posición inicial
-      // const siguienteX = dir == "x" ? 0 : -10; // Si es x, 0, si es z, -10
-      // const siguienteZ = dir == "z" ? 0 : -10; // Si es x, 0, si es z, -10
-      // //const siguienteDir = dir == "x" ? "z" : "x";
-      // const nWidth = initBoxSize; // Se cambiará por los futuros tamaños
-      // const nDepth = initBoxSize;
+      //Next level
+      //posición inicial
+      const siguienteX = dir == "x" ? 0 : -10; // Si es x, 0, si es z, -10
+      const siguienteZ = dir == "z" ? 0 : -10; // Si es x, 0, si es z, -10
+      //const siguienteDir = dir == "x" ? "z" : "x";
+      const nWidth = initBoxSize; // Se cambiará por los futuros tamaños
+      const nDepth = initBoxSize;
 
       
-      // addNivel(siguienteX, siguienteZ, nWidth, nDepth);
+      addNivel(siguienteX, siguienteZ, nWidth, nDepth);
       // if(nivel.direction == "z"){
       //   addNivel(0, 0, nivel.width, nivel.depth);
       // }else{
