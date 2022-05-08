@@ -161,10 +161,19 @@ function manejador(){
           console.log("No encima!");
           //Game Over
           //gestión de derrota
+          fin(); 
+        } 
+      }
+      if(head.direction == "z"){
+        if(head.threejs.position.z > prev.threejs.position.z - prev.depth &&
+           head.threejs.position.z < prev.threejs.position.z + prev.depth){ // Si está encima
+          console.log("Encima!");
+          encima = true;
+        }else{
+          console.log("No encima!");
+          //Game Over
+          //gestión de derrota
           fin();
-
-          lose = true;
-          jugando = false;
         }
       }
 
@@ -232,7 +241,11 @@ function fin(){
   console.log("Game Over!");
   //gestión de derrota
   //reset();
+  lose = true;
+          jugando = false;
   end = true;
+  camera.position.set(10*pila.length*hBox, 10*pila.length*hBox, 0);
+  camera.lookAt(scene.position);
   //gestión de victoria
 
 }
@@ -268,10 +281,11 @@ function updateCamera(){
   desplazar, seguimos moviendo la cámara.
   */
  
-  if(camera.position.y < hBox * pila.length + hCamera)
+  if(camera.position.y < hBox * (pila.length+1) + hCamera)
+    camera.position.y += hBox;
+
     //camera.position.set(10, hCamera + levelCont * hBox, 10);
     //camera.position.set(camera.position.x, hBox * pila.length + hCamera, camera.position.z);
-    camera.position.y += 0.01;
 
   renderer.render(scene, camera);
 }
