@@ -104,3 +104,35 @@ var render = function () {
   renderer.render(scene, camera);
 };
 render();
+
+// ------------------------------------------------
+// FUN ENDS HERE (LISTENERS STARTS HERE)
+// ------------------------------------------------
+let started = false;
+window.addEventListener("click", () =>{ 
+  if(!started){
+    //renderer.setAnimationLoop(animation);
+    //Usamos setAnimationLoop porque setAnimationFrame sólo se
+    //ejecuta una vez, y necesitamos que la animación se ejecute en bucle
+    started = true;
+  }else{
+    if(pila.length > 0){
+      const nivel = pila.pop();
+      scene.remove(nivel.threejs);
+      if(nivel.direction == "z"){
+        addNivel(0, 0, nivel.width, nivel.depth);
+      }else{
+        addNivel(0, 0, nivel.depth, nivel.width);
+      }
+  }
+}
+
+});
+function animation(){
+  const speed = 0.015;
+  const head = pila[pila.length - 1]; //elemento más alto de la pila
+  /*Vamos a cambiar la posición del cubo superior (head) en
+  el eje head.direction (x o z, en función de si es un nivel
+  par o impar) */
+  head.position[head.direction] += speed;
+}
