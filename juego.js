@@ -1,13 +1,24 @@
 // ------------------------------------------------
 // BASIC SETUP
 // ------------------------------------------------
-//Globales
+//Globales de three.js
 let camera, scene, renderer;
+let pila = [];
+const hBox = 0.8;
+const initBoxSize = 3;
+
+//Contadores y auxiliares
+let levelCont = 1;
 
 init();
 function init(){
   scene = new THREE.Scene(); // Crear una escena vacía
   
+  //
+  // Primer nivel
+  addNivel(0, 0, initBoxSize, initBoxSize);
+  addNivel(-10, 0, initBoxSize, initBoxSize, 1);
+
   // Cámara
   const aspect = window.innerWidth / window.innerHeight;
   const width = 20;
@@ -34,29 +45,49 @@ function init(){
   renderer = new THREE.WebGLRenderer({antialias:true}); // Crear con Antialiasing
   renderer.setClearColor("#000000"); // Configurar el clear color del render
   renderer.setSize( window.innerWidth, window.innerHeight ); // Configurar tamaño del render
-  
-  // Añadir render al HTML
-  document.body.appendChild( renderer.domElement );
+  //renderer.shadowMap.enabled = true; // Habilitar sombra
+  document.body.appendChild( renderer.domElement ); // Añadir render al HTML
 }
-
-
 
 
 // ------------------------------------------------
 // FUN STARTS HERE
 // ------------------------------------------------
 
+function addNivel(x, z, width, depth, n){
+  const y = pila.length * hBox; // Posición de la nueva capa
+  const nivel = createCube(x, y, z, width, depth);
+
+  if(levelCont % 2 == 0){
+    nivel.direction = "z";
+  }else{
+    nivel.direction = "x";
+  }
+  levelCont++;
+  
+  pila.push(nivel);
+}
+
+
 createCube();
-function createCube(){
+function createCube(x, y, z, width, depth) {
 
   // Cubo inicial
-  var geometry = new THREE.BoxGeometry( 3, 0.8, 3 );
+  //var geometry = new THREE.BoxGeometry( initBoxSize, hBox, initBoxSize );
+  var geometry = new THREE.BoxGeometry( width, hBox, depth );
   var material = new THREE.MeshLambertMaterial( { color: 0xfb8e00 } );
   var cube = new THREE.Mesh( geometry, material );
+  cube.position.set(x, y, z);
   //cube.position.set(0, 0, 0);
   //cube.rotateX(10);
   //cube.rotateY(Math.PI/4);
   scene.add( cube ); // Añadir el cubo a la escena
+
+  return {
+    threejs: cube,
+    width,
+    depth
+  };
 }
   
 
