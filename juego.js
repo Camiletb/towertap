@@ -18,7 +18,7 @@ function init(){
   //
   // Primer nivel
   addNivel(0, 0, initBoxSize, initBoxSize);
-  addNivel(-10, 0, initBoxSize, initBoxSize, 1);
+  addNivel(-10, 0, initBoxSize, initBoxSize, "x");
 
   // Cámara
   const aspect = window.innerWidth / window.innerHeight;
@@ -56,16 +56,16 @@ function init(){
 // FUN STARTS HERE
 // ------------------------------------------------
 
-function addNivel(x, z, width, depth){
+function addNivel(x, z, width, depth, direction){
   const y = pila.length * hBox; // Posición de la nueva capa
   const nivel = createCube(x, y, z, width, depth);
   //const direc;
   levelCont++;
-
-  if(levelCont % 2 == 0)
-    nivel.direction = "z";
-  else
-    nivel.direction = "x";
+  nivel.direction = direction;
+  // if(levelCont % 2 == 0)
+  //   nivel.direction = "z";
+  // else
+  //   nivel.direction = "x";
 
   pila.push(nivel);
 }
@@ -105,6 +105,16 @@ var render = function () {
   //renderer.setAnimationLoop(animation);
   // if(!started)
   //   animation();
+
+  const head = pila[pila.length - 1];
+      pila.forEach(function(cube){
+        if(cube.direction == "z"){
+          head.threejs.position.z += 0.15;
+        }else{
+          head.threejs.position.x += 0.15;
+        }
+
+      });
   // Render la escena
   renderer.render(scene, camera);
 };
@@ -127,14 +137,20 @@ function manejador(){
   }else{
     if(pila.length > 0){
       // Comportamiento de los cubos
-      pila.forEach(function(cube){
-        if(cube.direction == "z"){
-          cube.threejs.position.z += 1;
-        }else{
-          cube.threejs.position.x += 1;
-        }
+      // if(head.direction == "z"){
+      //   head.threejs.position.z += 1;
+      // }else{
+      //   head.threejs.position.x += 1;
+      // }
+      // const head = pila[pila.length - 1];
+      // pila.forEach(function(cube){
+      //   if(cube.direction == "z"){
+      //     head.threejs.position.z += 1;
+      //   }else{
+      //     head.threejs.position.x += 1;
+      //   }
 
-      });
+      // });
       // Comportamiento de la cámara
       //camera.position.z += 1;
       updateCamera();
