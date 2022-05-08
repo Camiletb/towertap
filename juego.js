@@ -6,7 +6,7 @@ let camera, scene, renderer;
 let pila = [];
 const hBox = 0.8;
 const initBoxSize = 3;
-const hCamera = (10, 5, 10); // posición inicial de la cámara
+const hCamera = 5; // posición inicial de la cámara
 
 //Contadores y auxiliares
 let levelCont = 1;
@@ -32,7 +32,7 @@ function init(){
       height / -2, 
       1, 
       1000 );
-  camera.position.set(10, 5, 10);
+  camera.position.set(10, hCamera, 10);
   camera.lookAt(scene.position);
 
   //Iluminación
@@ -46,7 +46,8 @@ function init(){
   renderer = new THREE.WebGLRenderer({antialias:true}); // Crear con Antialiasing
   renderer.setClearColor("#000000"); // Configurar el clear color del render
   renderer.setSize( window.innerWidth, window.innerHeight ); // Configurar tamaño del render
-  //renderer.shadowMap.enabled = true; // Habilitar sombra
+  renderer.shadowMap.enabled = true; // Habilitar sombra
+  //renderer.setAnimationLoop(animation);
   document.body.appendChild( renderer.domElement ); // Añadir render al HTML
 }
 
@@ -58,6 +59,7 @@ function init(){
 function addNivel(x, z, width, depth){
   const y = pila.length * hBox; // Posición de la nueva capa
   const nivel = createCube(x, y, z, width, depth);
+  //const direc;
   levelCont++;
 
   if(levelCont % 2 == 0)
@@ -100,7 +102,9 @@ var render = function () {
   requestAnimationFrame( render );
 
   //cube.rotation.y += 0.01;    
-
+  //renderer.setAnimationLoop(animation);
+  // if(!started)
+  //   animation();
   // Render la escena
   renderer.render(scene, camera);
 };
@@ -109,38 +113,58 @@ render();
 // ------------------------------------------------
 // FUN ENDS HERE (LISTENERS STARTS HERE)
 // ------------------------------------------------
-let started = false;
-window.addEventListener("click", () =>{ 
+let started = true;
+//window.addEventListener("mousedown", manejador);
+//window.addEventListener("touchstart", manejador);
+window.addEventListener("click", manejador);
+
+function manejador(){
   if(!started){
-    //renderer.setAnimationLoop(animation);
+    renderer.setAnimationLoop(animation);
     //Usamos setAnimationLoop porque setAnimationFrame sólo se
     //ejecuta una vez, y necesitamos que la animación se ejecute en bucle
     started = true;
   }else{
     if(pila.length > 0){
       // Comportamiento de los cubos
+      pila.forEach(function(cube){
+        if(cube.direction == "z"){
+          cube.threejs.position.z += 1;
+        }else{
+          cube.threejs.position.x += 1;
+        }
+
+      });
+      // Comportamiento de la cámara
+      //camera.position.z += 1;
+      updateCamera();
+
+
       //const nivel = pila.pop();
       //scene.remove(nivel.threejs);
-      const head = pila[pila.length - 1];
-      const dir = head.direction;
+      // const head = pila[pila.length - 1];
+      // const dir = head.direction;
 
-      //Next level
-      const siguienteX = dir == "x" ? 0 : -10; // Si es x, 0, si es z, -10
-      const siguienteZ = dir == "z" ? 0 : -10; // Si es x, 0, si es z, -10
-      //const siguienteDir = dir == "x" ? "z" : "x";
-      const nWidth = initBoxSize;
-      const nDepth = initBoxSize;
+      // //Next level
+      // //posición inicial
+      // const siguienteX = dir == "x" ? 0 : -10; // Si es x, 0, si es z, -10
+      // const siguienteZ = dir == "z" ? 0 : -10; // Si es x, 0, si es z, -10
+      // //const siguienteDir = dir == "x" ? "z" : "x";
+      // const nWidth = initBoxSize; // Se cambiará por los futuros tamaños
+      // const nDepth = initBoxSize;
 
-      addNivel(siguienteX, siguienteZ, nWidth, nDepth);
-      /*
-      if(nivel.direction == "z"){
-        addNivel(0, 0, nivel.width, nivel.depth);
-      }else{
-        addNivel(0, 0, nivel.depth, nivel.width);
-      }*/
+      
+      // addNivel(siguienteX, siguienteZ, nWidth, nDepth);
+      // if(nivel.direction == "z"){
+      //   addNivel(0, 0, nivel.width, nivel.depth);
+      // }else{
+      //   addNivel(0, 0, nivel.depth, nivel.width);
+      // }
+      // addNivel(0, 0, nivel.width, nivel.depth);
+      // addNivel(0, 0, nivel.depth, nivel.width);
     }
   }
-});
+}
 
 //Resetear el juego
 window.addEventListener("keydown", (e) => {
@@ -156,13 +180,13 @@ window.addEventListener("keydown", (e) => {
 });
 
 function animation(){
-  const speed = 0.015;
+  const speed = 0.15;
   const head = pila[pila.length - 1]; //elemento más alto de la pila
   /*Vamos a cambiar la posición del cubo superior (head) en
   el eje head.direction (x o z, en función de si es un nivel
   par o impar) */
   head.position[head.direction] += speed;
-
+  renderer.render(scene, camera);
   updateCamera();
 }
 
@@ -175,8 +199,10 @@ function updateCamera(){
   al nivel más alto de la pila, es decir, si la cámara no se ha acabado de 
   desplazar, seguimos moviendo la cámara.
   */
-  if(camera.position.y < hBox * pila.length + hCamera.y)
-    camera.position.y += speed;
+  if(camera.position.y < hBox * pila.length + hCamera)
+    //camera.position.set(10, hCamera + levelCont * hBox, 10);
+    //camera.position.set(camera.position.x, hBox * pila.length + hCamera, camera.position.z);
+    //camera.position.y += 0.1;
 
   renderer.render(scene, camera);
 }
