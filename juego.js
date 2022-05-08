@@ -58,13 +58,12 @@ function addNivel(x, z, width, depth, n){
   const y = pila.length * hBox; // Posición de la nueva capa
   const nivel = createCube(x, y, z, width, depth);
 
-  if(levelCont % 2 == 0){
+  if(levelCont % 2 == 0)
     nivel.direction = "z";
-  }else{
+  else
     nivel.direction = "x";
-  }
   levelCont++;
-  
+
   pila.push(nivel);
 }
 
@@ -72,11 +71,15 @@ function addNivel(x, z, width, depth, n){
 createCube();
 function createCube(x, y, z, width, depth) {
 
-  // Cubo inicial
+  // Cubo
   //var geometry = new THREE.BoxGeometry( initBoxSize, hBox, initBoxSize );
-  var geometry = new THREE.BoxGeometry( width, hBox, depth );
-  var material = new THREE.MeshLambertMaterial( { color: 0xfb8e00 } );
-  var cube = new THREE.Mesh( geometry, material );
+  var geometry, material, cube;
+  geometry = new THREE.BoxGeometry( width, hBox, depth );
+  if(pila.length % 2 == 0)
+    material = new THREE.MeshLambertMaterial( { color: 0xfb8e00 } );
+  else
+    material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
+  cube = new THREE.Mesh( geometry, material );
   cube.position.set(x, y, z);
   //cube.position.set(0, 0, 0);
   //cube.rotateX(10);
