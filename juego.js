@@ -46,15 +46,19 @@ function init(){
 // FUN STARTS HERE
 // ------------------------------------------------
 
-// Cubo inicial
-var geometry = new THREE.BoxGeometry( 3, 0.8, 3 );
-var material = new THREE.MeshLambertMaterial( { color: 0xfb8e00 } );
-var cube = new THREE.Mesh( geometry, material );
-//cube.position.set(0, 0, 0);
-//cube.rotateX(10);
-//cube.rotateY(Math.PI/4);
-scene.add( cube ); // Añadir el cubo a la escena
+createCube();
+function createCube(){
 
+  // Cubo inicial
+  var geometry = new THREE.BoxGeometry( 3, 0.8, 3 );
+  var material = new THREE.MeshLambertMaterial( { color: 0xfb8e00 } );
+  var cube = new THREE.Mesh( geometry, material );
+  //cube.position.set(0, 0, 0);
+  //cube.rotateX(10);
+  //cube.rotateY(Math.PI/4);
+  scene.add( cube ); // Añadir el cubo a la escena
+}
+  
 
 // Render Loop
 var render = function () {
