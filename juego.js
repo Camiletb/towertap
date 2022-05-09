@@ -121,7 +121,7 @@ var render = function () {
       if(head.direction == "x"){
         head.threejs.position.x += 0.05;
       }
-      //updateCamera();
+      updateCamera();
     //});
   }
 
@@ -157,6 +157,7 @@ function manejador(){
            head.threejs.position.x < prev.threejs.position.x + prev.width){ // Si está encima
           console.log("Encima!");
           encima = true;
+          cortar();
         }else{
           console.log("No encima!");
           //Game Over
@@ -169,6 +170,7 @@ function manejador(){
            head.threejs.position.z < prev.threejs.position.z + prev.depth){ // Si está encima
           console.log("Encima!");
           encima = true;
+          cortar();
         }else{
           console.log("No encima!");
           //Game Over
@@ -176,6 +178,8 @@ function manejador(){
           fin();
         }
       }
+
+
 
 
 
@@ -228,6 +232,19 @@ function manejador(){
       // addNivel(0, 0, nivel.depth, nivel.width);
     }
   }
+}
+// Conservar la parte del bloque que coincide con el anterior
+function cortar(){
+    const head = pila[pila.length - 1];
+    const prev = pila[pila.length - 2];
+    
+    const restWidth = prev.width - (head.threejs.position.x - prev.threejs.position.x);
+    const restDepth = prev.depth - (head.threejs.position.z - prev.threejs.position.z);
+    
+    return {
+        restWidth,
+        restDepth
+    };
 }
 
 //Resetear el juego
@@ -282,7 +299,7 @@ function updateCamera(){
   */
  
   if(camera.position.y < hBox * (pila.length+1) + hCamera)
-    camera.position.y += hBox;
+    camera.position.y += 0.05;
 
     //camera.position.set(10, hCamera + levelCont * hBox, 10);
     //camera.position.set(camera.position.x, hBox * pila.length + hCamera, camera.position.z);
