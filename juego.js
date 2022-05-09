@@ -4,8 +4,8 @@
 //Globales de three.js
 let camera, scene, renderer;
 let pila = [];
-const hBox = 0.8;
-const initBoxSize = 3;
+const hBox = 1;
+const initBoxSize = 5;
 const hCamera = 5; // posición inicial de la cámara
 
 //Contadores y auxiliares
@@ -36,7 +36,7 @@ function init(){
       height / -2, 
       1, 
       1000 );
-  camera.position.set(10, hCamera, 10);
+  camera.position.set(10, 3*hBox + hCamera, 10);
   camera.lookAt(scene.position);
 
   //Iluminación
