@@ -8,6 +8,8 @@ const hBox = 1;
 const initBoxSize = 5;
 const hCamera = 5; // posición inicial de la cámara
 
+let BoxSize = [initBoxSize, initBoxSize]; // Array de tamaños de cajas
+let nuevoCentro = [];
 //Contadores y auxiliares
 let levelCont = 1;
 let encima = false;
@@ -150,6 +152,7 @@ function manejador(){
     jugando = true;
   }else{
     if(pila.length > 0){
+        const nuevasMedidas = [];
       console.log("Click! Bloque número: ", pila.length, ".");
 
       // Comprobamos si el último bloque está encima del bloque anterior
@@ -188,32 +191,6 @@ function manejador(){
         }
       }
 
-
-
-
-
-
-
-      // Comportamiento de los cubos
-      // if(head.direction == "z"){
-      //   head.threejs.position.z += 1;
-      // }else{
-      //   head.threejs.position.x += 1;
-      // }
-      // const head = pila[pila.length - 1];
-      // pila.forEach(function(cube){
-      //   if(cube.direction == "z"){
-      //     head.threejs.position.z += 1;
-      //   }else{
-      //     head.threejs.position.x += 1;
-      //   }
-
-      // });
-      // Comportamiento de la cámara
-      //camera.position.z += 1;
-      updateCamera();
-
-
       //const nivel = pila.pop();
       //scene.remove(nivel.threejs);
       // const head = pila[pila.length - 1];
@@ -225,11 +202,13 @@ function manejador(){
         const siguienteX = dir == "x" ? 0 : -10; // Si es x, 0, si es z, -10
         const siguienteZ = dir == "z" ? 0 : -10; // Si es z, 0, si es x, -10
         const siguienteDir = dir == "x" ? "z" : "x";
-        const nWidth = initBoxSize; // Se cambiará por los futuros tamaños
-        const nDepth = initBoxSize;
+        const nWidth = BoxSize[0]; // Se cambiará por los futuros tamaños
+        const nDepth = BoxSize[1];
 
         
         encima = false;
+        //addNivel(siguienteX, siguienteZ, nWidth, nDepth, siguienteDir);
+        console.log("Las dimensiones del cubo van a ser", nWidth," x ", nDepth);
         addNivel(siguienteX, siguienteZ, nWidth, nDepth, siguienteDir);
       }
       // if(nivel.direction == "z"){
@@ -252,8 +231,8 @@ function cortar(headExtremos, prevExtremos){
 
     
     //const p0 = prevExtremos[0];
-    const p0 = 0;
-    const p1 = 0;
+    let p0 = 0;
+    let p1 = 0;
     const prevSize = prevExtremos[1] - prevExtremos[0];
     const dist = prevExtremos[1] - headExtremos[1];
     const newSize = prevSize - dist; // widthprev - distancia entre prevPP[1] y headPP[0] = nuevo width/depth
@@ -270,12 +249,16 @@ function cortar(headExtremos, prevExtremos){
 
     const pini = (p1 + p0) / 2; // nuevo centro
     
-    const nuevosExtremos = [p0, p1];
-    return {
-        newExtremos,
-        newSize,
-        pini
-    };
+    const newExtremos = [p0, p1];
+    //const vectorMedidas = [newExtremos, newSize, pini];
+    let aux = Math.abs(newSize);
+    console.log("Nuevo tamaño: ", newSize);
+    if(head.direction == "x"){
+        BoxSize[0] = aux;
+    }
+    else{
+        BoxSize[1] = aux;
+    }
 }
 
 //Resetear el juego
