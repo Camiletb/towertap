@@ -4,8 +4,8 @@
 //Globales de three.js
 let camera, scene, renderer;
 let pila = [];
-const hBox = 1;
-const initBoxSize = 5;
+const hBox = 0.6;
+const initBoxSize = 3;
 const hCamera = 5; // posición inicial de la cámara
 
 let BoxSize = [initBoxSize, initBoxSize]; // Array de tamaños de cajas
