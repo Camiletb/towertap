@@ -1,27 +1,53 @@
-// ------------------------------------------------
-// BASIC SETUP
-// ------------------------------------------------
-//Globales de three.js
+// -------------------------------------------------------------------------- //
+// BASIC SETUP                                                                //
+// -------------------------------------------------------------------------- //
+
+// Globales de three.js
 let camera, scene, renderer;
-let pila = [];
-const hBox = 0.6;
-const initBoxSize = 3;
-const hCamera = 5; // posición inicial de la cámara
+let pila = [];  // Pila que contiene los bloques
+let colgajo;
+const hBox = 0.6; // Altura del bloque
+const initBoxSize = 6;  // Tamaño inicial del bloque
+const hCamera = 3;  // Posición inicial de la cámara
 
 let BoxSize = [initBoxSize, initBoxSize]; // Array de tamaños de cajas
-let nuevoCentro = [-10, 0];
-//Contadores y auxiliares
+let nuevoCentro = [];
+
+// Globales de tweens.js
+var tweens;
+
+// Variables de GLTFLoader
+const loader = new THREE.GLTFLoader();
+var root;
+var shrekBool = false;
+var shrekTtl = 6000;
+
+// Contadores y auxiliares
 let levelCont = 1;
 let encima = false;
 let lose = false;
 let end = false;
+var boolCubo = true;
+var boolColgajo = false;
+
+// Elementos DOM
+const divLevel = document.getElementById("nivel");
+const divReglas = document.getElementById("reglas");
+
+// Instrucciones
+let ins = "Con 'R' reseteas la partida. Pero por ninguna razón pulses 'X'.";
+
 
 init();
-function init(){
+
+/* -------------------------------------------------------------------------- */
+/* Función init(): inicializa las variables del juego, setea la luz, escena,  */
+/* cámara y render, y crea los objetos que se van a usar.                     */
+/* -------------------------------------------------------------------------- */
+function init() {
   end = false;
   scene = new THREE.Scene(); // Crear una escena vacía
-  
-  //
+
   // Primer nivel
   addNivel(0, 0, initBoxSize, initBoxSize);
   addNivel(-10, 0, initBoxSize, initBoxSize, "x");
@@ -37,66 +63,82 @@ function init(){
       height / 2, 
       height / -2, 
       1, 
-      1000 );
+      1000);
   camera.position.set(10, 3*hBox + hCamera, 10);
-  camera.lookAt(scene.position);
+  camera.lookAt(scene.position);  
 
-  //Iluminación
+  // Iluminación
   const a_light = new THREE.AmbientLight(0xffffff, 0.6); // Luz ambiente
   scene.add(a_light);
   const d_light = new THREE.DirectionalLight(0xffffff, 0.6); // Luz direccional
   d_light.position.set(10, 20, 0);
   scene.add(d_light);
 
-  
   // Configurar el render
   renderer = new THREE.WebGLRenderer({antialias:true}); // Crear con Antialiasing
   renderer.setClearColor("#000000"); // Configurar el clear color del render
-  renderer.setSize( window.innerWidth, window.innerHeight ); // Configurar tamaño del render
+  renderer.setSize(window.innerWidth, window.innerHeight); // Configurar tamaño del render
   renderer.shadowMap.enabled = true; // Habilitar sombra
   //renderer.setAnimationLoop(animation);
   document.body.appendChild( renderer.domElement ); // Añadir render al HTML
 }
 
 
-// ------------------------------------------------
-// FUN STARTS HERE
-// ------------------------------------------------
+// -------------------------------------------------------------------------- //
+// GAME FUNCTIONS                                                             //
+// -------------------------------------------------------------------------- //
 
-function addNivel(x, z, width, depth, direction){
-  const y = pila.length * hBox; // Posición de la nueva capa
-  const nivel = createCube(x, y, z, width, depth);
-  //const direc;
-  levelCont++;
-  nivel.direction = direction;
-  nivel.width = width;
-  nivel.depth = depth;
-  // if(levelCont % 2 == 0)
-  //   nivel.direction = "z";
-  // else
-  //   nivel.direction = "x";
+/* -------------------------------------------------------------------------- */
+/* Función addNivel(): crea un nuevo bloque y lo añade a la pila de niveles.  */
+/* -------------------------------------------------------------------------- */
+function addNivel (x, z, width, depth, direction, color) {
+  var y;
+  var nivel;
 
-  pila.push(nivel); // Añadir el nivel a la pila
+  if (boolCubo) {
+    y = pila.length * hBox; // Posición de la nueva capa
+    nivel = createCube(x, y, z, width, depth, color);
+    levelCont++;
+    nivel.direction = direction;
+    nivel.width = width;
+    nivel.depth = depth;
+    pila.push(nivel); // Añadir el nivel a la pila
+    divLevel.innerText = pila.length - 1;
+  }
+  else {
+    y = (pila.length - 1) * hBox; // Posición y del colgajo
+    colgajo = createCube(x, y, z, width, depth, color);
+    colgajo.direction = direction;
+    colgajo.width = width;
+    colgajo.depth = depth;
+  }
 }
 
-
+/* -------------------------------------------------------------------------- */
+/* Función createCube(): crea un nuevo bloque y lo devuelve a él mismo y      */
+/* sus dimensiones.                                                           */
+/* -------------------------------------------------------------------------- */
 createCube();
-function createCube(x, y, z, width, depth) {
-
+function createCube(x, y, z, width, depth, colorb) {
   // Cubo
-  //var geometry = new THREE.BoxGeometry( initBoxSize, hBox, initBoxSize );
   var geometry, material, cube;
   geometry = new THREE.BoxGeometry( width, hBox, depth );
-  if(pila.length % 2 == 0)
-    material = new THREE.MeshLambertMaterial( { color: 0xfb8e00 } );
+  const color = new THREE.Color(`hsl(${1 + pila.length * 10}, 50%, 50%)`);
+  //const colortorre = new THREE.Color(`hsl(${30 + pila.length * 4}, 100%, 50%)`);
+  if (colorb == 4) {
+    material = new THREE.MeshLambertMaterial({color: 0xffffff});
+  }
   else
-    material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
-  cube = new THREE.Mesh( geometry, material );
+    material = new THREE.MeshLambertMaterial({color});
+    //material = new THREE.MeshLambertMaterial({color: 0xfb8e00 + pila.length * 0x000020});
+
+  cube = new THREE.Mesh(geometry, material);
   cube.position.set(x, y, z);
   //cube.position.set(0, 0, 0);
   //cube.rotateX(10);
   //cube.rotateY(Math.PI/4);
-  scene.add( cube ); // Añadir el cubo a la escena
+
+  scene.add(cube); // Añadir el cubo a la escena
 
   return {
     threejs: cube,
@@ -106,85 +148,108 @@ function createCube(x, y, z, width, depth) {
 }
   
 
-// Render Loop
+/* -------------------------------------------------------------------------- */
+/* Render loop                                                                */
+/* -------------------------------------------------------------------------- */
 var render = function () {
-  requestAnimationFrame( render );
+  requestAnimationFrame(render);
 
   //cube.rotation.y += 0.01;    
   //renderer.setAnimationLoop(animation);
   // if(!started)
   //   animation();
 
-  if(!end){
+  if (!end) {
     //and NotLose
     const head = pila[pila.length - 1];
     //pila.forEach(function(cube){
-      if(head.direction == "z"){
-        head.threejs.position.z += 0.05;
-      }
-      if(head.direction == "x"){
-        head.threejs.position.x += 0.05;
-      }
-      updateCamera();
-    //});
+    if (head.direction == "z") {
+      head.threejs.position.z += 0.15;
+    }
+    if (head.direction == "x") {
+      head.threejs.position.x += 0.15;
+    }
+
+    let prev = pila[pila.length - 2];
+    var aux1prev = [prev.threejs.position.x - prev.width, prev.threejs.position.x + prev.width]; // auxiliar para comprobar si el bloque actual está encima del extremo anterior del bloque anterior
+    var aux2prev = [prev.threejs.position.z - prev.depth, prev.threejs.position.z + prev.depth]; // auxiliar para comprobar si el bloque actual está encima del extremo posterior del bloque anterior
+
+    if(head.threejs.position.x > aux1prev[1])
+      fin();
+    if(head.threejs.position.z > aux2prev[1])
+      fin();
+
+      
+    if (boolColgajo)
+      colgajo.threejs.position.y -= 0.1;
+
+    TWEEN.update();
+    updateCamera();
   }
 
-  //if
-  // Render la escena
+  // Render de la escena
   renderer.render(scene, camera);
 };
 
 render();
 
-// ------------------------------------------------
-// FUN ENDS HERE (LISTENERS STARTS HERE)
-// ------------------------------------------------
+// -------------------------------------------------------------------------- //
+// LISTENERS                                                                  //
+// -------------------------------------------------------------------------- //
 let jugando = true;
-//window.addEventListener("mousedown", manejador);
 //window.addEventListener("touchstart", manejador);
 window.addEventListener("click", manejador);
 
-function manejador(){
-  if(!jugando){
+function manejador() {
+  if (!jugando) {
+    divReglas.style.visibility = "show";
     //renderer.setAnimationLoop(animation);
     //Usamos setAnimationLoop porque setAnimationFrame sólo se
     //ejecuta una vez, y necesitamos que la animación se ejecute en bucle
     jugando = true;
-  }else{
+  }
+  else {
+    divReglas.innerText = ins;
+    const head = pila[pila.length - 1];
+    const prev = pila[pila.length - 2];
+    var dir = head.direction;
+    const siguienteX = dir == "x" ? 0 : -10; // Si es x, 0, si es z, -10
+    const siguienteZ = dir == "z" ? 0 : -10; // Si es z, 0, si es x, -10
+    nuevoCentro = [siguienteX, siguienteZ];
     if(pila.length > 0){
         const nuevasMedidas = [];
-      console.log("Click! Bloque número: ", pila.length, ".");
 
       // Comprobamos si el último bloque está encima del bloque anterior
-      const head = pila[pila.length - 1];
-      const prev = pila[pila.length - 2];
       const xhead = [head.threejs.position.x - head.width/2, head.threejs.position.x + head.width/2];
       const zhead = [head.threejs.position.z - head.depth/2, head.threejs.position.z + head.depth/2];
       const xprev = [prev.threejs.position.x - prev.width/2, prev.threejs.position.x + prev.width/2];
       const zprev = [prev.threejs.position.z - prev.depth/2, prev.threejs.position.z + prev.depth/2];
       const aux1prev = [prev.threejs.position.x - prev.width, prev.threejs.position.x + prev.width]; // auxiliar para comprobar si el bloque actual está encima del extremo anterior del bloque anterior
       const aux2prev = [prev.threejs.position.z - prev.depth, prev.threejs.position.z + prev.depth]; // auxiliar para comprobar si el bloque actual está encima del extremo posterior del bloque anterior
-      if(head.direction == "x"){
-        if(head.threejs.position.x > aux1prev[0] &&
-           head.threejs.position.x < aux2prev[1]){ // Si está encima
-          console.log("Encima!");
-          encima = true;
-          cortar(xhead, xprev);
-        }else{
-          console.log("No encima!");
+      
+      if(head.threejs.position.x > aux1prev[1])
+        fin();
+
+      if (head.direction == "x") {
+        if (head.threejs.position.x > aux1prev[0] &&
+          head.threejs.position.x < aux1prev[1]) { // Si está encima
+            encima = true;
+            cortar(xhead, xprev);
+        }
+        else{          
           //Game Over
           //gestión de derrota
           fin(); 
         } 
       }
+
       if(head.direction == "z"){
-        if(head.threejs.position.z > aux1prev[0] &&
-           head.threejs.position.z < aux2prev[1]){ // Si está encima
-          console.log("Encima!");
-          encima = true;
-          cortar(zhead, zprev);
-        }else{
-          console.log("No encima!");
+        if(head.threejs.position.z > aux2prev[0] &&
+          head.threejs.position.z < aux2prev[1]) { // Si está encima
+            encima = true;
+            cortar(zhead, zprev);
+        }
+        else {
           //Game Over
           //gestión de derrota
           fin();
@@ -194,13 +259,12 @@ function manejador(){
       //const nivel = pila.pop();
       //scene.remove(nivel.threejs);
       // const head = pila[pila.length - 1];
-      if(!lose){
-        const dir = head.direction;
 
+      if(!lose){
+        dir = head.direction;
         //Next level
         //posición inicial
-        const siguienteX = dir == "x" ? 0 : -10; // Si es x, 0, si es z, -10
-        const siguienteZ = dir == "z" ? 0 : -10; // Si es z, 0, si es x, -10
+
         const siguienteDir = dir == "x" ? "z" : "x";
         const nWidth = BoxSize[0]; // Se cambiará por los futuros tamaños
         const nDepth = BoxSize[1];
@@ -208,27 +272,16 @@ function manejador(){
         //nuevoCentro = (siguienteX, siguienteZ);
         encima = false;
         //addNivel(siguienteX, siguienteZ, nWidth, nDepth, siguienteDir);
-        console.log("Las dimensiones del cubo van a ser", nWidth," x ", nDepth);
-        addNivel(siguienteX, siguienteZ, nWidth, nDepth, siguienteDir);
+        const next = addNivel(nuevoCentro[0], nuevoCentro[1], nWidth, nDepth, siguienteDir);
       }
-      // if(nivel.direction == "z"){
-      //   addNivel(0, 0, nivel.width, nivel.depth);
-      // }else{
-      //   addNivel(0, 0, nivel.depth, nivel.width);
-      // }
-      // addNivel(0, 0, nivel.width, nivel.depth);
-      // addNivel(0, 0, nivel.depth, nivel.width);
     }
   }
 }
+
 // Conservar la parte del bloque que coincide con el anterior
 function cortar(headExtremos, prevExtremos){
     const head = pila[pila.length - 1];
     const prev = pila[pila.length - 2];
-    
-    //const restWidth = prev.width - (head.threejs.position.x - prev.threejs.position.x);
-    //const restDepth = prev.depth - (head.threejs.position.z - prev.threejs.position.z);
-
     
     //const p0 = prevExtremos[0];
     let p0 = 0;
@@ -236,84 +289,116 @@ function cortar(headExtremos, prevExtremos){
     const prevSize = prevExtremos[1] - prevExtremos[0];
     const headSize = headExtremos[1] - headExtremos[0];
     const dist = prevExtremos[1] - headExtremos[1];
-    const newSize = headSize - dist; // widthprev - distancia entre prevPP[1] y headPP[0] = nuevo width/depth
-    //Si el centro de la cabeza es mayor o menor que el centro del bloque anterior se queda a la derecha o a la izquierda del bloque anterior)
-    //let centroPrev =prevSize/2;
-    // if(head.position == "x"){
-    //     if(head.position.x <= prev.position.x){//antes de tiempo
-    //         //cogemos p0 de referencia
-    //         p0 = prevExtremos[0]; //nuevo p0
-    //         newSize = headSize - (prevExtremos[0] - headExtremos[0]); //nuevo width
-    //     }else{ //tarde
-    //         //cogemos p1 de referencia
-    //         p1 = prevExtremos[1];
-    //         newSize = headSize - (headExtremos[1] - prevExtremos[1]); //nuevo width
-            
-    //     }
-    //     BoxSize[0] = newSize;
-    //     console.log("Bloque[0]= ", BoxSize[0]);
-    // }
-    // if(head.direction == "z"){
-    //     if(head.position.z <= prev.position.z){//antes de tiempo
-    //         //cogemos p0 de referencia
-    //         p0 = prevExtremos[0]; //nuevo p0
-    //         newSize = headSize - (prevExtremos[0] - headExtremos[0]); //nuevo width
-    //     }
-    //     else{ //tarde
-    //         //cogemos p1 de referencia
-    //         p1 = prevExtremos[1];
-    //         newSize = headSize - (headExtremos[1] - prevExtremos[1]); //nuevo width
-            
-    //     }
-    //     BoxSize[1] = newSize;
-    // }
-    console.log("El nuevo tamaño es", newSize);
-    
-    let aux = Math.abs(newSize);
-    if(newSize > 0){ //Izquierda
-        p0 = prevExtremos[0]; //nuevo p0
-        p1 = prevExtremos[0] + newSize; //nuevo p1
+    //const newSize = headSize - dist; // widthprev - distancia entre prevPP[1] y headPP[0] = nuevo width/depth
+    let newSize = 0;
 
-    }else if (newSize < 0){ //derecha
-        p0 = prevExtremos[1] + newSize; //nuevo p0 (signo más porque newSize es negativa)
-        p1 = prevExtremos[1]; //nuevo p1
-    }else{
-        console.log("Nada que cortar!");
-    }
+    let delta;
 
-    const pini = (p1 - p0) / 2; // nuevo centro
-    
-    const newExtremos = [p0, p1];
-    //const vectorMedidas = [newExtremos, newSize, pini];
-    console.log("Nuevo tamaño: ", newSize);
-    if(head.direction == "x"){
-        BoxSize[0] = aux;
-        nuevoCentro[1] = pini;
+    if (head.direction == "x") {
+      delta = head.threejs.position.x - prev.threejs.position.x;
     }
-    else{
-        BoxSize[1] = aux;
-        nuevoCentro[0] = pini;
+    else {
+      delta = head.threejs.position.z - prev.threejs.position.z;
+    }
+    
+    let colgajo = Math.abs(delta);
+    let overlap = headSize - colgajo;
+    
+    if (overlap > 0) { // cortar
+      newSize = overlap;
+      if (head.direction == "x") {
+        BoxSize[0] = newSize;
+        if (delta < 0)
+          nuevoCentro[0] = prevExtremos[0] + newSize/2;
+        else
+          nuevoCentro[0] = prevExtremos[1] - newSize/2;
+
+        splitHead(head, headExtremos, delta, newSize, 1);
+      }
+      else {
+        BoxSize[1] = newSize;
+        if (delta < 0)
+          nuevoCentro[1] = prevExtremos[0] + newSize/2;
+        else
+          nuevoCentro[1] = prevExtremos[1] - newSize/2;
+
+        splitHead(head, headExtremos, delta, newSize, 0);
+      }
     }
 }
+
+function splitHead(head, headExtremos, delta, newSize, direccion) {
+  let p0 = headExtremos[0];
+  let p1 = headExtremos[1];
+  let colgajo = Math.abs(delta);
+  let newPos;
+  let posColgajo;
+
+  if (delta >= 0) {
+    newPos = headExtremos[0] + newSize/2;
+    posColgajo = headExtremos[1] - colgajo/2;
+  }
+  else {
+    newPos = headExtremos[1] - newSize/2;
+    posColgajo = headExtremos[0] + colgajo/2;
+  }
+  
+  pila.pop();
+  scene.remove(head.threejs);
+
+  if (direccion) { // viene de X
+    // Resize head
+    addNivel(newPos, head.threejs.position.z, newSize, BoxSize[1], head.direction, 3);
+    // Create colgajo
+    boolCubo = false;
+    boolColgajo = true;
+    addNivel(posColgajo, head.threejs.position.z, colgajo, BoxSize[1], head.direction, 4);
+    boolCubo = true;
+  }
+  else { // viene de X
+    // Resize head
+    addNivel(head.threejs.position.x, newPos, BoxSize[0], newSize, head.direction, 3);
+    // Create colgajo
+    boolCubo = false;
+    boolColgajo = true;
+    addNivel(head.threejs.position.x, posColgajo, BoxSize[0], colgajo, head.direction, 4);
+    boolCubo = true;
+  }
+}
+
 
 //Resetear el juego
 window.addEventListener("keydown", (e) => {
-  if(e.key == "r"){
+  if(e.key == "r" || e.key == "R")
     reset();
-}
+  if(e.key == "x" || e.key == "X"){
+    divReglas.innerText = "Oye. Eso era una 'X'!";
+    ins = "Desobediente y sin ninguna vergüenza. Me gusta. Con 'Z' puedes volver a las instrucciones.";
+    if (!shrekBool) {
+      _LoadAnimatedModel();
+      shrekBool = true;
+    }
+  }
+  if(e.key == "z" || e.key == "Z"){
+    divReglas.innerText = "Ah, pues no.";
+    ins = "Soy una torre malvada, pero no mucho, con 'i' puedes revisar las instrucciones.";
+  }
+  if(e.key == "i" || e.key == "I"){
+    divReglas.innerText = "Tómalas, aunque no creo que las necesites. Sólo buscabas conversar conmigo.";
+    ins = "Con 'R' reseteas la partida. Con click colocas tu bloque.";
+  }
+  
 });
 
 function fin(){
-  console.log("Game Over!");
+  divReglas.innerText = "Perdiste, la verdad, no te voy a mentir. Pulsa R, anda, que nos echamos otra.";
   //gestión de derrota
   //reset();
   lose = true;
           jugando = false;
   end = true;
-  camera.position.set(10*pila.length*hBox, 10*pila.length*hBox, 0);
-  camera.lookAt(scene.position);
-  //gestión de victoria
-
+  camera.position.set(0, 10*pila.length*hBox, 0);
+  camera.lookAt(scene.position);  
 }
 
 function reset(){
@@ -340,7 +425,6 @@ function animation(){
 function updateCamera(){
   /*Vamos a cambiar la posición de la cámara en función del
   nivel más alto de la pila:
-
   Si la posición de la cámara es menor que la suma de la posición
   inicial (hCamera.y) y el incremento de h que le corresponde
   al nivel más alto de la pila, es decir, si la cámara no se ha acabado de 
@@ -352,6 +436,42 @@ function updateCamera(){
 
     //camera.position.set(10, hCamera + levelCont * hBox, 10);
     //camera.position.set(camera.position.x, hBox * pila.length + hCamera, camera.position.z);
+
+  renderer.render(scene, camera);
+}
+
+function _LoadAnimatedModel() {
+  // Loader
+  loader.load('model/scene.gltf', function(gltf) {
+    root = gltf.scene;
+    root.name = "shrek";
+    root.position.y = pila.length * hBox;
+    root.scale.set(1.5, 1.5, 1.5);
+
+    mixer = new THREE.AnimationMixer(root);
+    mixer.clipAction(gltf.animations[0]).play();
+
+    scene.add(root);
+    animate();
+  }, function(xhr){console.log((xhr.loaded/xhr.total * 100) + "% loaded");},
+     function(error){console.log("Error: " + error);});
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  var shrek = scene.getObjectByName("shrek");
+
+  var target = {x: shrek.rotation.x, y: shrek.rotation.y + 150 * Math.PI, z: shrek.rotation.z};
+  var rotation = shrek.rotation;
+  var tween = new TWEEN.Tween(rotation).to(target, shrekTtl);
+  tween.easing(TWEEN.Easing.Bounce.Out);
+  tween.start();
+
+  tween.onComplete(function(){
+		shrekBool = false;
+    scene.remove(root);
+	});
 
   renderer.render(scene, camera);
 }
