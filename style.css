@@ -1,0 +1,29 @@
+/* Para borrar los margenes del navegador */
+body{
+    margin: 0;
+    overflow: hidden;
+}
+
+#nivel{
+    padding: 10px;
+    background-color: brown;
+    position: absolute;
+    color: white;
+    font-size: 3em;
+    font-weight: bold;
+    top: 192px;
+    right: 30px;
+
+}
+
+#reglas{
+    padding: 10px;
+    position: absolute;
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+    bottom: 40px;
+    left: 30px;
+    text-align: center;
+
+}
