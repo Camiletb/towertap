@@ -9,6 +9,7 @@ let colgajo;
 const hBox = 0.6; // Altura del bloque
 const initBoxSize = 6;  // Tamaño inicial del bloque
 const hCamera = 3;  // Posición inicial de la cámara
+const speed = 0.05 // Velocidad del juego
 
 let BoxSize = [initBoxSize, initBoxSize]; // Array de tamaños de cajas
 let nuevoCentro = [];
@@ -164,10 +165,10 @@ var render = function () {
     const head = pila[pila.length - 1];
     //pila.forEach(function(cube){
     if (head.direction == "z") {
-      head.threejs.position.z += 0.15;
+      head.threejs.position.z += speed;
     }
     if (head.direction == "x") {
-      head.threejs.position.x += 0.15;
+      head.threejs.position.x += speed;
     }
 
     let prev = pila[pila.length - 2];
@@ -412,7 +413,7 @@ function reset(){
 }
 
 function animation(){
-  const speed = 0.05;
+  //const speed_aux = speed;
   const head = pila[pila.length - 1]; //elemento más alto de la pila
   /*Vamos a cambiar la posición del cubo superior (head) en
   el eje head.direction (x o z, en función de si es un nivel
