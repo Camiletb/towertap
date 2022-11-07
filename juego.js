@@ -412,7 +412,7 @@ function reset(){
 }
 
 function animation(){
-  const speed = 0.10;
+  const speed = 0.05;
   const head = pila[pila.length - 1]; //elemento más alto de la pila
   /*Vamos a cambiar la posición del cubo superior (head) en
   el eje head.direction (x o z, en función de si es un nivel
