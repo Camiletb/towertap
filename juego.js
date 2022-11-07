@@ -425,6 +425,7 @@ function animation(){
 function updateCamera(){
   /*Vamos a cambiar la posición de la cámara en función del
   nivel más alto de la pila:
+
   Si la posición de la cámara es menor que la suma de la posición
   inicial (hCamera.y) y el incremento de h que le corresponde
   al nivel más alto de la pila, es decir, si la cámara no se ha acabado de 
